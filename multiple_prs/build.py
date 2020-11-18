@@ -14,7 +14,7 @@ CI.base_folder = os.path.realpath(os.path.dirname(__file__))
 ci_server = CI()
 artifactory = "http://localhost:8081/artifactory/api/conan/conan-local"
 artifactory_user = "admin"
-artifactory_passwd = "ENTER YOUR PASSWORD"
+artifactory_passwd = "Patata!12"
 
 
 def package_pipeline(ci, repository, branch, upload=None, lockfile=None):
@@ -115,8 +115,18 @@ pkg = "hello"
 repo = repos_urls[pkg]
 alice.git_clone(repo)
 alice.cd(pkg)
-alice.edit("src/hello.cpp", "World", "Moon")
+alice.edit("src/hello.cpp", "hello(){", "hello(std::string msg){std::cout<<msg<<std::endl;")
+alice.edit("src/hello.h", "#pragma once", "#pragma once\n#include <string>")
+alice.edit("src/hello.h", "hello()", "hello(std::string msg)")
 alice.git_commit()
 alice.git_push()
-package_pipeline(ci_server, repo, branch="master", upload="master")
-product_pipeline(ci_server)
+
+pkg = "chat"
+repo = repos_urls[pkg]
+alice.git_clone(repo)
+alice.cd(pkg)
+alice.edit("stc/chat.cpp", "hello()", 'hello("MyParameter!")')
+alice.git_commit()
+alice.git_push()
+
+joint_pipeline(ci_server, ["hello", "chat"], branch="parameter", upload="master")

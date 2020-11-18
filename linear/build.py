@@ -1,5 +1,5 @@
 """
-Needs 1 Artifactory repo in: http://localhost:8081/artifactory/api/conan/ci-master
+Needs 1 Artifactory repo
 """
 
 import os
@@ -11,6 +11,9 @@ from utils.utils import setenv, chdir
 User.base_folder = os.path.realpath(os.path.dirname(__file__))
 CI.base_folder = os.path.realpath(os.path.dirname(__file__))
 ci_server = CI()
+artifactory = "http://localhost:8081/artifactory/api/conan/conan-local"
+artifactory_user = "admin"
+artifactory_passwd = "ENTER YOUR PASSWORD"
 
 
 def package_pipeline(ci, repository, branch):
@@ -19,8 +22,8 @@ def package_pipeline(ci, repository, branch):
     os.makedirs(cache_folder, exist_ok=True)
     with setenv("CONAN_USER_HOME", cache_folder):
         ci.run("conan remote remove conan-center")
-        ci.run("conan remote add master http://localhost:8081/artifactory/api/conan/ci-master -f")
-        ci.run("conan user admin -p=password -r=master")
+        ci.run("conan remote add master {} -f".format(artifactory))
+        ci.run("conan user {} -p={} -r=master".format(artifactory_user, artifactory_passwd))
         with chdir(job_folder):
             ci.run("git clone %s" % repository)
             repo_folder = os.path.basename(repository)
